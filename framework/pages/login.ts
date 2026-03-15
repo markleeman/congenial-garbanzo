@@ -7,12 +7,14 @@ export class LoginPage {
 
     readonly username: Locator;
     readonly password: Locator;
+    readonly loginButton: Locator;
 
     constructor(page: Page) {
         this.page = page;
 
         this.username = this.page.getByRole('textbox', { name: 'username' });
-        this.password = this.page.getByRole('textbox', { name: 'password' })
+        this.password = this.page.getByRole('textbox', { name: 'password' });
+        this.loginButton = this.page.getByRole('button', { name: 'Log In' });
     }
 
     async goto() {
@@ -20,7 +22,15 @@ export class LoginPage {
     }
 
     async loginAs(user: User) {
-        await this.username.fill(user.email);
-        await this.password.fill(user.password);
+
+        // Fill in out login details from our user object
+        await this.username.pressSequentially(user.email);
+        await this.password.pressSequentially(user.password);
+
+        // Click login button and wait for the login request to complete
+        const responsePromise = this.page.waitForResponse('**/svc/shreddit/account/login');
+        await this.loginButton.click();
+        await responsePromise;
+
     }
 }
